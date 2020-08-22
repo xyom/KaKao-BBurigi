@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kakao.recruit.spray.dao.SprayDAO">
+    <resultMap id="participantMap" type="com.kakao.recruit.spray.dto.UserDTO">
+        <result column="participant_id" property="userId"/>
+    </resultMap>
+
+    <resultMap id="sprayMoneyMap" type="com.kakao.recruit.spray.dto.SprayMoneyDTO">
+        <result column="TOKEN" property="token"/>
+        <result column="USER_ID" property="userId"/>
+        <result column="TOTAL_MONEY" property="totalMoney"/>
+        <result column="REMAIN_MONEY" property="remainMoney"/>
+        <result column="ROOM_ID" property="roomId"/>
+        <result column="REG_DATE" property="regDate"/>
+    </resultMap>
+
+    <resultMap id="mappedSprayMap" type="com.kakao.recruit.spray.dto.UserMappedSprayDTO">
+        <result column="ID" property="id"/>
+        <result column="TOKEN" property="token"/>
+        <result column="user_id" property="userId"/>
+        <result column="allocated_money" property="allocatedMoney"/>
+        <result column="received" property="received"/>
+    </resultMap>
+
+    <select id="getRoomParticipant" parameterType="HashMap" resultMap="participantMap">
+        SELECT PARTICIPANT_ID FROM ROOM_PARTICIPANT WHERE ROOM_ID=#{roomId};
+    </select>
+    <select id="getRoomParticipantById" parameterType="HashMap" resultMap="participantMap">
+        SELECT PARTICIPANT_ID FROM ROOM_PARTICIPANT WHERE ROOM_ID=#{roomId} AND PARTICIPANT_ID=#{userId};
+    </select>
+
+    <!--SPRAY_MONEY-->
+    <select id="getSprayMoney" parameterType="HashMap" resultMap="sprayMoneyMap">
+        SELECT TOKEN, USER_ID, TOTAL_MONEY, REMAIN_MONEY, ROOM_ID, REG_DATE FROM SPRAY_MONEY WHERE TOKEN=#{token}
+    </select>
+    <insert id="insertSprayMoney" parameterType="com.kakao.recruit.spray.dto.SprayMoneyDTO">
+        INSERT INTO SPRAY_MONEY(TOKEN, USER_ID, TOTAL_MONEY, REMAIN_MONEY, ROOM_ID) VALUES(#{token}, #{userId}, #{totalMoney}, #{remainMoney}, #{roomId})
+    </insert>
+    <update id="updateRemainSprayMoney" parameterType="com.kakao.recruit.spray.dto.SprayMoneyDTO">
+        UPDATE SPRAY_MONEY
+            SET REMAIN_MONEY=#{remainMoney}
+            WHERE TOKEN = #{token}
+    </update>
+    <update id="updateRegDateSprayMoney" parameterType="HashMap">
+        UPDATE SPRAY_MONEY
+            SET REG_DATE=#{regDate}
+            WHERE TOKEN = #{token}
+    </update>
+    <!--SPRAY_MONEY-->
+
+
+    <!-- USER_MAPPED_SPRAY-->
+    <select id="getUserMappedSprayByTokenAndUserId" parameterType="HashMap" resultMap="mappedSprayMap">
+        SELECT ID, TOKEN, USER_ID, ALLOCATED_MONEY, RECEIVED FROM USER_MAPPED_SPRAY_MONEY WHERE TOKEN=#{token} AND USER_ID=#{userId}
+    </select>
+
+    <select id="getUserMappedSprayByTokenAndReceived" parameterType="HashMap" resultMap="mappedSprayMap">
+        SELECT ID, TOKEN, USER_ID, ALLOCATED_MONEY, RECEIVED FROM USER_MAPPED_SPRAY_MONEY WHERE TOKEN=#{token} AND RECEIVED=#{received}
+    </select>
+
+    <select id="getUserMappedSprayByTokenAndReceivedForUpdate" parameterType="HashMap" resultMap="mappedSprayMap">
+        SELECT ID, TOKEN, USER_ID, ALLOCATED_MONEY, RECEIVED FROM USER_MAPPED_SPRAY_MONEY WHERE TOKEN=#{token} AND RECEIVED=#{received} FOR UPDATE
+    </select>
+
+    <insert id="insertUserMappedSpray" parameterType="com.kakao.recruit.spray.dto.UserMappedSprayDTO">
+        INSERT INTO USER_MAPPED_SPRAY_MONEY(TOKEN, USER_ID, allocated_money) VALUES(#{token}, #{userId}, #{allocatedMoney})
+    </insert>
+
+    <update id="updateUserMappedSpray" parameterType="com.kakao.recruit.spray.dto.UserMappedSprayDTO">
+        UPDATE USER_MAPPED_SPRAY_MONEY
+            SET USER_ID = #{userId},
+            RECEIVED = #{received}
+            WHERE ID = #{id}
+    </update>
+    <!-- USER_MAPPED_SPRAY-->
+</mapper>
